@@ -13,8 +13,7 @@ env-down:
 env-cleanup:
 	@read -p "are u sure [y/N]" ans; \
 	if [ "$$ans" = "y" ]; then \
-		docker compose down todoapp-postgres && \
-		sudo rm -rf out/pgdata &&  \
+		docker compose down -v && \
 		echo "filles delete"; \
 	else \
 		echo "clean canseled"; \
@@ -51,3 +50,9 @@ env-port-forward:
 
 env-port-close:
 	@docker compose down  port-forwarder
+
+todoapp-run:
+	@export LOGGER_FOLDER=${PROJECT_ROOT}/out/logs && \
+	export POSTGRES_HOST=localhost && \
+	go mod tidy && \
+	go run ${PROJECT_ROOT}/cmd/todoapp/main.go
