@@ -8,7 +8,7 @@ import (
 	"syscall"
 
 	core_logger "github.com/StanislavSizhuk/go_to_do/internal/core/logger"
-	core_postgres_pool "github.com/StanislavSizhuk/go_to_do/internal/core/repository/posgres/pool"
+	core_pgx_pool "github.com/StanislavSizhuk/go_to_do/internal/core/repository/posgres/pool/pgx"
 	core_http_middleware "github.com/StanislavSizhuk/go_to_do/internal/core/transport/http/middleware"
 	core_http_server "github.com/StanislavSizhuk/go_to_do/internal/core/transport/http/server"
 	users_postgres_repository "github.com/StanislavSizhuk/go_to_do/internal/feature/user/repository/postgres"
@@ -34,9 +34,10 @@ func main() {
 	defer logger.Close()
 
 	logger.Debug("init database pool")
-	pool, err := core_postgres_pool.NewConnectionPool(
+
+	pool, err := core_pgx_pool.NewPool(
 		ctx,
-		core_postgres_pool.NewConfigMust(),
+		core_pgx_pool.NewConfigMust(),
 	)
 	if err != nil {
 		logger.Fatal("failed to init database pool: ", zap.Error(err))
@@ -58,14 +59,12 @@ func main() {
 		logger,
 		core_http_middleware.RequestID(),
 		core_http_middleware.Logger(logger),
-		core_http_middleware.Panic(),
 		core_http_middleware.Trace(),
+		core_http_middleware.Panic(),
 	)
 
 	apiVersionRouter := core_http_server.NewAPIVersionRouter(core_http_server.ApiVersion1)
 	apiVersionRouter.RegisterRoutes(usersTransportHTTP.Routes()...)
-
-
 
 	httpServer.RegisterAPIRoutes(apiVersionRouter)
 

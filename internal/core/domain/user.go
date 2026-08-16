@@ -69,6 +69,16 @@ type UserPatch struct {
 	PhoneNumber Nullable[string]
 }
 
+func NewUserPatch(
+	fullName Nullable[string],
+	phoneNumber Nullable[string],
+) UserPatch {
+	return UserPatch{
+		FullName:    fullName,
+		PhoneNumber: phoneNumber,
+	}
+}
+
 func (u *UserPatch) Validate() error {
 	if u.FullName.Set && u.FullName.Value == nil {
 		return fmt.Errorf("`FullName` cannot be patched to null : %w", core_errors.ErrInvalidArgument)

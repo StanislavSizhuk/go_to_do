@@ -7,7 +7,7 @@ import (
 
 	"github.com/StanislavSizhuk/go_to_do/internal/core/domain"
 	core_errors "github.com/StanislavSizhuk/go_to_do/internal/core/errors"
-	"github.com/jackc/pgx/v5"
+	core_postgres_pool "github.com/StanislavSizhuk/go_to_do/internal/core/repository/posgres/pool"
 )
 
 func (r *UsersRepository) PatchUser(
@@ -23,7 +23,7 @@ func (r *UsersRepository) PatchUser(
 		SET full_name = $1, phone_number = $2,
 		version = version + 1
 		WHERE id = $3 AND version = $4
-		RETURNING id, version, full_name, phone_number
+		RETURNING id, version, full_name, phone_number;
 	`
 
 	row := r.pool.QueryRow(ctx, query, user.FullName, user.PhoneNumber, id, user.Version)
@@ -36,21 +36,21 @@ func (r *UsersRepository) PatchUser(
 		&userModel.PhoneNumber,
 	)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) { 
+		if errors.Is(err, core_postgres_pool.ErrNoRows) {
 			return domain.User{}, fmt.Errorf("user with id = '%d' concurrently accessed: %w",
-		id,
-		core_errors.ErrConflict,
-		)
+				id,
+				core_errors.ErrConflict,
+			)
+		}
+
+		return domain.User{}, fmt.Errorf("scan error: %w", err)
 	}
 
-	return domain.User{}, fmt.Errorf("scan error: %w", err)
-}
-
-userDomain := domain.NewUser(
-	userModel.ID,
-	userModel.Version,
-	userModel.FullName,
-	userModel.PhoneNumber,
-)
-return userDomain, nil
+	userDomain := domain.NewUser(
+		userModel.ID,
+		userModel.Version,
+		userModel.FullName,
+		userModel.PhoneNumber,
+	)
+	return userDomain, nil
 }

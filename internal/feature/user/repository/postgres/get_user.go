@@ -7,7 +7,7 @@ import (
 
 	"github.com/StanislavSizhuk/go_to_do/internal/core/domain"
 	core_errors "github.com/StanislavSizhuk/go_to_do/internal/core/errors"
-	"github.com/jackc/pgx/v5"
+	core_postgres_pool "github.com/StanislavSizhuk/go_to_do/internal/core/repository/posgres/pool"
 )
 
 func (r *UsersRepository) GetUser(
@@ -38,10 +38,10 @@ func (r *UsersRepository) GetUser(
 	)
 	if err != nil {
 
-		if errors.Is(err, pgx.ErrNoRows) {
+		if errors.Is(err, core_postgres_pool.ErrNoRows) {
 			return domain.User{}, fmt.Errorf("user with id %d not found: %w",
-			 id,
-			 core_errors.ErrNotFound,
+				id,
+				core_errors.ErrNotFound,
 			)
 		}
 		return domain.User{}, fmt.Errorf("scan error: %w", err)
