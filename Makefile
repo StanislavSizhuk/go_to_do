@@ -51,6 +51,15 @@ env-port-forward:
 env-port-close:
 	@docker compose down  port-forwarder
 
+logs-cleanup:
+	@read -p "Clear all log files? Risk of losing logs. [y/N]: " ans; \
+	if [ "$$ans" = "y" ]; then \
+		rm -rf ${PROJECT_ROOT}/out/logs && \
+		echo "Log files cleared"; \
+	else \
+		echo "Log cleanup cancelled"; \
+	fi
+
 todoapp-run:
 	@export LOGGER_FOLDER=${PROJECT_ROOT}/out/logs && \
 	export POSTGRES_HOST=localhost && \
