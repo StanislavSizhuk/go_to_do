@@ -40,14 +40,22 @@ func (h *HTTPREsponseHandler) NoContentResponse() {
 	h.rw.WriteHeader(http.StatusNoContent)
 }
 
-func (h *HTTPREsponseHandler) ErrorResponse (err error, msg string) {
+func (h *HTTPREsponseHandler) HTMLResponse(html []byte) {
+	h.rw.WriteHeader(http.StatusOK)
+	h.rw.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if _, err := h.rw.Write(html); err != nil {
+		h.log.Error("write HTML HTTP response", zap.Error(err))
+	}
+}
 
-	var(
+func (h *HTTPREsponseHandler) ErrorResponse(err error, msg string) {
+
+	var (
 		statusCode int
-		logFunc func(string, ...zap.Field)
+		logFunc    func(string, ...zap.Field)
 	)
 
-	switch{
+	switch {
 	case errors.Is(err, core_errors.ErrInvalidArgument):
 		statusCode = http.StatusBadRequest
 		logFunc = h.log.Warn
@@ -55,13 +63,12 @@ func (h *HTTPREsponseHandler) ErrorResponse (err error, msg string) {
 	case errors.Is(err, core_errors.ErrNotFound):
 		statusCode = http.StatusNotFound
 
-		logFunc  = h.log.Debug
+		logFunc = h.log.Debug
 
-	
 	case errors.Is(err, core_errors.ErrConflict):
 		statusCode = http.StatusConflict
 		logFunc = h.log.Warn
-	
+
 	default:
 		statusCode = http.StatusInternalServerError
 		logFunc = h.log.Error
@@ -72,13 +79,11 @@ func (h *HTTPREsponseHandler) ErrorResponse (err error, msg string) {
 	h.errorResponse(
 		statusCode,
 		err,
-		msg, 
+		msg,
 	)
 	//h.errorResponse( , err, msg)
 
 }
-
-
 
 func (h *HTTPREsponseHandler) PanicResponse(p any, msg string) {
 	statusCode := http.StatusInternalServerError
@@ -97,7 +102,7 @@ func (h *HTTPREsponseHandler) errorResponse(
 	statusCode int,
 	err error,
 	msg string,
-){
+) {
 
 	response := map[string]string{
 		"message": msg,
@@ -106,8 +111,7 @@ func (h *HTTPREsponseHandler) errorResponse(
 
 	h.JSONResponse(
 		response,
-		statusCode, 
+		statusCode,
 	)
 
-	
 }
