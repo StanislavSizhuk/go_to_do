@@ -12,9 +12,9 @@ import (
 )
 
 type PatchTaskRequest struct {
-	Title       core_http_types.Nullable[string] `json:"title"`
-	Description core_http_types.Nullable[string] `json:"description"`
-	Completed   core_http_types.Nullable[bool]   `json:"completed"`
+	Title       core_http_types.Nullable[string] `json:"title" swaggertype:"string" example:"Buy groceries"`
+	Description core_http_types.Nullable[string] `json:"description" swaggertype:"string" example:"Milk, eggs, bread"`
+	Completed   core_http_types.Nullable[bool]   `json:"completed" swaggertype:"boolean" example:"true"`
 }
 
 type PatchUserResponse TaskDTOResponse
@@ -49,6 +49,19 @@ func (r *PatchTaskRequest) Validate() error {
 	return nil
 }
 
+// PatchTask godoc
+// @Summary      Partially update a task
+// @Description  Updates one or more fields of a task. Only fields present in the request body are modified.
+// @Tags         tasks
+// @Accept       json
+// @Produce      json
+// @Param        id       path      int               true  "Task ID"
+// @Param        request  body      PatchTaskRequest  true  "Fields to update"
+// @Success      200      {object}  PatchUserResponse
+// @Failure      400      {object}  core_http_response.ErrorResponse
+// @Failure      404      {object}  core_http_response.ErrorResponse
+// @Failure      500      {object}  core_http_response.ErrorResponse
+// @Router       /tasks/{id} [patch]
 func (h *TasksHTTPHandler) PatchTask(rw http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := core_logger.FromContext(ctx)

@@ -8,6 +8,15 @@ import (
 	core_http_response "github.com/StanislavSizhuk/go_to_do/internal/core/transport/http/response"
 )
 
+// DeleteUser godoc
+// @Summary      Delete a user by ID
+// @Tags         users
+// @Param        id   path  int  true  "User ID"
+// @Success      204  "No Content"
+// @Failure      400  {object}  core_http_response.ErrorResponse
+// @Failure      404  {object}  core_http_response.ErrorResponse
+// @Failure      500  {object}  core_http_response.ErrorResponse
+// @Router       /users/{id} [delete]
 func (h *UsersHTTPHandler) DeleteUser(rw http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()

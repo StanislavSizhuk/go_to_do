@@ -13,8 +13,8 @@ import (
 )
 
 type PatchUserRequest struct {
-	FullName    core_http_types.Nullable[string] `json:"full_name"`
-	PhoneNumber core_http_types.Nullable[string] `json:"phone_number"`
+	FullName    core_http_types.Nullable[string] `json:"full_name" swaggertype:"string" example:"John Doe"`
+	PhoneNumber core_http_types.Nullable[string] `json:"phone_number" swaggertype:"string" example:"+380501234567"`
 }
 
 func (r *PatchUserRequest) Validate() error {
@@ -47,6 +47,19 @@ func (r *PatchUserRequest) Validate() error {
 
 type PatchUserResponse UserDTOResponse
 
+// PatchUser godoc
+// @Summary      Partially update a user
+// @Description  Updates one or more fields of a user. Only fields present in the request body are modified.
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        id       path      int               true  "User ID"
+// @Param        request  body      PatchUserRequest  true  "Fields to update"
+// @Success      200      {object}  PatchUserResponse
+// @Failure      400      {object}  core_http_response.ErrorResponse
+// @Failure      404      {object}  core_http_response.ErrorResponse
+// @Failure      500      {object}  core_http_response.ErrorResponse
+// @Router       /users/{id} [patch]
 func (h *UsersHTTPHandler) PatchUser(rw http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := core_logger.FromContext(ctx)

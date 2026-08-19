@@ -10,13 +10,23 @@ import (
 )
 
 type CreateTaskRequest struct {
-	Title        string  `json:"title" validate:"required,min=1,max=100"`
-	Description  *string `json:"description" validate:"omitempty,min=1,max=1000"`
-	AuthorUserID int     `json:"author_user_id" validate:"required"`
+	Title        string  `json:"title" validate:"required,min=1,max=100" example:"Buy groceries"`
+	Description  *string `json:"description" validate:"omitempty,min=1,max=1000" example:"Milk, eggs, bread"`
+	AuthorUserID int     `json:"author_user_id" validate:"required" example:"1"`
 }
 
 type CreateTaskResponse TaskDTOResponse
 
+// CreateTask godoc
+// @Summary      Create a new task
+// @Tags         tasks
+// @Accept       json
+// @Produce      json
+// @Param        request  body      CreateTaskRequest  true  "Task payload"
+// @Success      201      {object}  CreateTaskResponse
+// @Failure      400      {object}  core_http_response.ErrorResponse
+// @Failure      500      {object}  core_http_response.ErrorResponse
+// @Router       /tasks [post]
 func (h *TasksHTTPHandler) CreateTask(rw http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := core_logger.FromContext(ctx)
