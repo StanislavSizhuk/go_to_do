@@ -11,6 +11,12 @@ import (
 	"go.uber.org/zap"
 )
 
+// ErrorResponse is the JSON body returned for failed requests.
+type ErrorResponse struct {
+	Message string `json:"message" example:"failed to get user"`
+	Error   string `json:"error" example:"not found"`
+}
+
 type HTTPREsponseHandler struct {
 	log *core_logger.Logger
 	rw  http.ResponseWriter

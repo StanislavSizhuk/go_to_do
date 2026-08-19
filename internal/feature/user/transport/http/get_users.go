@@ -11,6 +11,17 @@ import (
 
 type GetUsersResponse []UserDTOResponse
 
+// GetUsers godoc
+// @Summary      List users
+// @Description  Returns a paginated list of users.
+// @Tags         users
+// @Produce      json
+// @Param        limit   query     int  false  "Maximum number of users to return"
+// @Param        offset  query     int  false  "Number of users to skip"
+// @Success      200     {object}  GetUsersResponse
+// @Failure      400     {object}  core_http_response.ErrorResponse
+// @Failure      500     {object}  core_http_response.ErrorResponse
+// @Router       /users [get]
 func (h *UsersHTTPHandler) GetUsers(rw http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
