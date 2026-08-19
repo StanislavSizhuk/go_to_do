@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>To Do App</title>
+<style>
+  :root {
+    --bg: #f4f5f9;
+    --surface: #ffffff;
+    --surface-alt: #f0f1f6;
+    --border: #e3e5ee;
+    --text: #1b1e2b;
+    --text-muted: #6b7080;
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --primary-soft: #eef0fe;
+    --success: #17994f;
+    --success-soft: #e6f7ee;
+    --danger: #dc2626;
+    --danger-hover: #b91c1c;
+    --danger-soft: #fdeceb;
+    --warning: #b45309;
+    --radius-sm: 6px;
+    --radius: 10px;
+    --radius-lg: 14px;
+    --shadow: 0 1px 2px rgba(20, 22, 40, .06), 0 4px 14px rgba(20, 22, 40, .06);
+    --shadow-lg: 0 12px 32px rgba(20, 22, 40, .18);
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #13141c;
+      --surface: #1b1d29;
+      --surface-alt: #21232f;
+      --border: #2c2f3f;
+      --text: #e8e9f1;
+      --text-muted: #9498ab;
+      --primary: #6366f1;
+      --primary-hover: #7c7ff2;
+      --primary-soft: #262a45;
+      --success: #34d17e;
+      --success-soft: #143323;
+      --danger: #f26a63;
+      --danger-hover: #f68b85;
+      --danger-soft: #3a1f22;
+      --warning: #f0b352;
+      color-scheme: dark;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #13141c;
+    --surface: #1b1d29;
+    --surface-alt: #21232f;
+    --border: #2c2f3f;
+    --text: #e8e9f1;
+    --text-muted: #9498ab;
+    --primary: #6366f1;
+    --primary-hover: #7c7ff2;
+    --primary-soft: #262a45;
+    --success: #34d17e;
+    --success-soft: #143323;
+    --danger: #f26a63;
+    --danger-hover: #f68b85;
+    --danger-soft: #3a1f22;
+    --warning: #f0b352;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+  }
+
+  button, input, select, textarea {
+    font: inherit;
+    color: inherit;
+  }
+
+  .app-shell {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 0 14px;
+    flex-wrap: wrap;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 19px;
+    font-weight: 700;
+    margin-right: auto;
+  }
+
+  .brand-icon {
+    display: inline-grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    background: var(--primary);
+    color: #fff;
+    font-size: 16px;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface-alt);
+    padding: 4px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+  }
+
+  .tab-btn {
+    border: none;
+    background: transparent;
+    padding: 8px 16px;
+    border-radius: calc(var(--radius) - 3px);
+    cursor: pointer;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 14px;
+    transition: background .15s, color .15s;
+  }
+
+  .tab-btn:hover { color: var(--text); }
+
+  .tab-btn.active {
+    background: var(--surface);
+    color: var(--primary);
+    box-shadow: var(--shadow);
+  }
+
+  .icon-btn {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: inline-grid;
+    place-items: center;
+    font-size: 15px;
+    line-height: 1;
+    transition: border-color .15s, color .15s, background .15s;
+  }
+
+  .icon-btn:hover { color: var(--text); border-color: var(--primary); }
+  .icon-btn.danger:hover { color: var(--danger); border-color: var(--danger); }
+
+  .panel { display: none; }
+  .panel.active { display: block; animation: fade .15s ease; }
+
+  @keyframes fade {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 10px 0 16px;
+    flex-wrap: wrap;
+  }
+
+  .panel-head h1 {
+    font-size: 20px;
+    margin: 0;
+  }
+
+  .btn {
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    padding: 9px 16px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background .15s, border-color .15s, color .15s, transform .05s;
+    white-space: nowrap;
+  }
+
+  .btn:active { transform: scale(.98); }
+
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { background: var(--primary-hover); }
+
+  .btn-ghost {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--text);
+  }
+  .btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
+
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-danger:hover { background: var(--danger-hover); }
+
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+
+  .filters {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+
+  select, input[type="text"], input[type="date"], input[type="tel"], textarea {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 9px 12px;
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color .15s;
+  }
+
+  select:focus, input:focus, textarea:focus { border-color: var(--primary); }
+
+  .filters select { min-width: 160px; }
+  .filters input[type="text"] { flex: 1; min-width: 160px; }
+
+  .list { display: flex; flex-direction: column; gap: 10px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+
+  .task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+  }
+
+  .task-item.completed .task-title { text-decoration: line-through; color: var(--text-muted); }
+  .task-item.completed { opacity: .75; }
+
+  .checkbox {
+    position: relative;
+    width: 22px;
+    height: 22px;
+    flex: none;
+    margin-top: 1px;
+    cursor: pointer;
+  }
+  .checkbox input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    margin: 0;
+  }
+  .checkmark {
+    position: absolute;
+    inset: 0;
+    border: 2px solid var(--border);
+    border-radius: 7px;
+    background: var(--surface);
+    display: grid;
+    place-items: center;
+    transition: background .15s, border-color .15s;
+  }
+  .checkmark::after {
+    content: "";
+    width: 6px;
+    height: 10px;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) translate(-1px, -1px);
+    opacity: 0;
+  }
+  .checkbox input:checked + .checkmark {
+    background: var(--success);
+    border-color: var(--success);
+  }
+  .checkbox input:checked + .checkmark::after { opacity: 1; }
+
+  .task-main { flex: 1; min-width: 0; }
+
+  .task-title { font-weight: 600; font-size: 15px; word-break: break-word; }
+
+  .task-desc {
+    color: var(--text-muted);
+    font-size: 13.5px;
+    margin-top: 3px;
+    word-break: break-word;
+    white-space: pre-wrap;
+  }
+
+  .task-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .badge, .meta-item {
+    font-size: 12px;
+    color: var(--text-muted);
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 3px 9px;
+  }
+
+  .badge.author { color: var(--primary); background: var(--primary-soft); border-color: transparent; }
+
+  .task-actions { display: flex; gap: 6px; flex: none; }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+  }
+
+  .empty-state .emoji { font-size: 30px; display: block; margin-bottom: 8px; }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead th {
+    text-align: left;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    color: var(--text-muted);
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  tbody td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    vertical-align: middle;
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+
+  .row-actions { display: flex; gap: 6px; justify-content: flex-end; }
+
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 18px;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+
+  .stat-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-top: 4px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+    box-shadow: var(--shadow);
+  }
+
+  .stat-card .label {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+
+  .stat-card .value {
+    font-size: 26px;
+    font-weight: 700;
+    margin-top: 8px;
+  }
+
+  .stat-card.accent .value { color: var(--primary); }
+
+  /* modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 11, 20, .5);
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    z-index: 100;
+  }
+  .modal-overlay.hidden { display: none; }
+
+  .modal {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 440px;
+    padding: 22px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal h2 { margin: 0 0 16px; font-size: 17px; }
+
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text-muted);
+  }
+  .field input, .field select, .field textarea { width: 100%; }
+  .field textarea { resize: vertical; min-height: 70px; }
+  .field .hint { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+  .field .error { font-size: 12px; color: var(--danger); margin-top: 4px; display: none; }
+  .field.invalid input, .field.invalid select, .field.invalid textarea { border-color: var(--danger); }
+  .field.invalid .error { display: block; }
+
+  .checkbox-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    margin-bottom: 14px;
+  }
+  .checkbox-line input { width: 16px; height: 16px; }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 18px;
+  }
+
+  .readonly-value {
+    font-size: 14px;
+    padding: 9px 12px;
+    background: var(--surface-alt);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+
+  /* toast */
+  .toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 200;
+    max-width: 320px;
+  }
+
+  .toast {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--primary);
+    box-shadow: var(--shadow-lg);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-size: 13.5px;
+    animation: slide-in .18s ease;
+  }
+  .toast.error { border-left-color: var(--danger); }
+  .toast.success { border-left-color: var(--success); }
+
+  @keyframes slide-in {
+    from { opacity: 0; transform: translateX(12px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .skeleton {
+    height: 60px;
+    border-radius: var(--radius);
+    background: linear-gradient(90deg, var(--surface-alt) 25%, var(--border) 37%, var(--surface-alt) 63%);
+    background-size: 400% 100%;
+    animation: shimmer 1.4s ease infinite;
+  }
+  @keyframes shimmer {
+    0% { background-position: 100% 50%; }
+    100% { background-position: 0 50%; }
+  }
+
+  @media (max-width: 640px) {
+    .topbar { flex-direction: column; align-items: stretch; }
+    .brand { margin-right: 0; }
+    .tabs { justify-content: space-between; }
+    .row-actions { justify-content: flex-start; }
+    table, thead, tbody, tr, td { display: block; width: 100%; }
+    thead { display: none; }
+    tbody tr {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 10px;
+      padding: 4px 0;
+    }
+    tbody td {
+      border-bottom: none;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    tbody td::before {
+      content: attr(data-label);
+      font-weight: 600;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-icon">✓</span> To Do</div>
+      <nav class="tabs" role="tablist">
+        <button class="tab-btn active" data-tab="tasks" type="button">Завдання</button>
+        <button class="tab-btn" data-tab="users" type="button">Користувачі</button>
+        <button class="tab-btn" data-tab="stats" type="button">Статистика</button>
+      </nav>
+      <button class="icon-btn" id="theme-toggle" type="button" title="Змінити тему">🌙</button>
+    </header>
+
+    <main>
+      <!-- TASKS -->
+      <section id="panel-tasks" class="panel active">
+        <div class="panel-head">
+          <h1>Завдання</h1>
+          <button class="btn btn-primary" id="btn-new-task" type="button">+ Нове завдання</button>
+        </div>
+
+        <div class="filters">
+          <select id="filter-task-user"><option value="">Усі користувачі</option></select>
+          <select id="filter-task-status">
+            <option value="">Усі статуси</option>
+            <option value="active">Активні</option>
+            <option value="done">Виконані</option>
+          </select>
+          <input type="text" id="filter-task-search" placeholder="Пошук за назвою…">
+          <select id="tasks-page-size" title="Кількість завдань на сторінці">
+            <option value="5">5 на сторінці</option>
+            <option value="10">10 на сторінці</option>
+            <option value="20" selected>20 на сторінці</option>
+            <option value="50">50 на сторінці</option>
+          </select>
+          <button class="btn btn-ghost" id="btn-refresh-tasks" type="button">Оновити</button>
+        </div>
+
+        <div id="tasks-list" class="list"></div>
+        <div class="pagination" id="tasks-pagination"></div>
+      </section>
+
+      <!-- USERS -->
+      <section id="panel-users" class="panel">
+        <div class="panel-head">
+          <h1>Користувачі</h1>
+          <button class="btn btn-primary" id="btn-new-user" type="button">+ Новий користувач</button>
+        </div>
+
+        <div class="filters">
+          <select id="users-page-size" title="Кількість користувачів на сторінці">
+            <option value="5">5 на сторінці</option>
+            <option value="10">10 на сторінці</option>
+            <option value="20" selected>20 на сторінці</option>
+            <option value="50">50 на сторінці</option>
+          </select>
+        </div>
+
+        <div class="card" style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Ім'я</th>
+                <th>Телефон</th>
+                <th>Версія</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="users-table-body"></tbody>
+          </table>
+        </div>
+        <div id="users-empty"></div>
+        <div class="pagination" id="users-pagination"></div>
+      </section>
+
+      <!-- STATS -->
+      <section id="panel-stats" class="panel">
+        <div class="panel-head">
+          <h1>Статистика</h1>
+        </div>
+
+        <form class="filters" id="stats-form">
+          <select id="stats-user"><option value="">Усі користувачі</option></select>
+          <input type="date" id="stats-from" title="Від дати">
+          <input type="date" id="stats-to" title="До дати">
+          <button class="btn btn-primary" type="submit">Застосувати</button>
+          <button class="btn btn-ghost" type="button" id="btn-stats-reset">Скинути</button>
+        </form>
+
+        <div id="stats-cards" class="stat-cards"></div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-overlay hidden" id="modal-overlay">
+    <div class="modal" id="modal"></div>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  const API_BASE = "/api/v1";
+
+  /* ---------- helpers ---------- */
+
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return "";
+    return String(str)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+  }
+
+  function formatDateTime(iso) {
+    if (!iso) return "";
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return iso;
+    return d.toLocaleString("uk-UA", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  }
+
+  function formatGoDuration(str) {
+    if (!str) return "—";
+    const match = str.match(/^(?:(\d+)h)?(?:(\d+)m)?(?:([\d.]+)s)?/);
+    if (!match) return str;
+    const [, h, m, s] = match;
+    const parts = [];
+    if (h) parts.push(`${h} год`);
+    if (m) parts.push(`${m} хв`);
+    if (s && !h) parts.push(`${Math.round(parseFloat(s))} с`);
+    return parts.length ? parts.join(" ") : str;
+  }
+
+  function qs(params = {}) {
+    const usp = new URLSearchParams();
+    Object.entries(params).forEach(([k, v]) => {
+      if (v !== undefined && v !== null && v !== "") usp.set(k, v);
+    });
+    const s = usp.toString();
+    return s ? `?${s}` : "";
+  }
+
+  async function api(path, options = {}) {
+    let res;
+    try {
+      res = await fetch(API_BASE + path, {
+        headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+        ...options,
+      });
+    } catch (e) {
+      throw new Error("Немає з'єднання з сервером API");
+    }
+
+    if (res.status === 204) return null;
+
+    let data = null;
+    const text = await res.text();
+    if (text) {
+      try { data = JSON.parse(text); } catch (e) { /* not json */ }
+    }
+
+    if (!res.ok) {
+      const msg = (data && (data.message || data.error)) || `Помилка HTTP ${res.status}`;
+      throw new Error(msg);
+    }
+    return data;
+  }
+
+  const Users = {
+    list: (params) => api("/users" + qs(params)),
+    get: (id) => api(`/users/${id}`),
+    create: (body) => api("/users", { method: "POST", body: JSON.stringify(body) }),
+    patch: (id, body) => api(`/users/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
+    remove: (id) => api(`/users/${id}`, { method: "DELETE" }),
+  };
+
+  const Tasks = {
+    list: (params) => api("/tasks" + qs(params)),
+    get: (id) => api(`/tasks/${id}`),
+    create: (body) => api("/tasks", { method: "POST", body: JSON.stringify(body) }),
+    patch: (id, body) => api(`/tasks/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
+    remove: (id) => api(`/tasks/${id}`, { method: "DELETE" }),
+  };
+
+  const Statistics = {
+    get: (params) => api("/statistics" + qs(params)),
+  };
+
+  /* ---------- toast ---------- */
+
+  const toastRoot = document.getElementById("toast-container");
+  function toast(message, type = "info") {
+    const el = document.createElement("div");
+    el.className = `toast ${type}`;
+    el.textContent = message;
+    toastRoot.appendChild(el);
+    setTimeout(() => el.remove(), 4200);
+  }
+
+  /* ---------- state ---------- */
+
+  const state = {
+    usersMap: new Map(),
+    allUsers: [],
+
+    tasks: [],
+    tasksLimit: 20,
+    tasksOffset: 0,
+    tasksHasMore: false,
+    tasksFilterUser: "",
+    tasksFilterStatus: "",
+    tasksSearch: "",
+
+    users: [],
+    usersLimit: 20,
+    usersOffset: 0,
+    usersHasMore: false,
+  };
+
+  /* ---------- tabs ---------- */
+
+  document.querySelectorAll(".tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+      document.querySelectorAll(".panel").forEach((p) => p.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById(`panel-${btn.dataset.tab}`).classList.add("active");
+    });
+  });
+
+  /* ---------- theme ---------- */
+
+  const themeToggle = document.getElementById("theme-toggle");
+  function applyTheme(theme) {
+    if (theme) {
+      document.documentElement.setAttribute("data-theme", theme);
+    } else {
+      document.documentElement.removeAttribute("data-theme");
+    }
+    const isDark = theme
+      ? theme === "dark"
+      : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    themeToggle.textContent = isDark ? "☀️" : "🌙";
+  }
+  const savedTheme = localStorage.getItem("todo-theme");
+  applyTheme(savedTheme);
+  themeToggle.addEventListener("click", () => {
+    const current = document.documentElement.getAttribute("data-theme")
+      || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    const next = current === "dark" ? "light" : "dark";
+    localStorage.setItem("todo-theme", next);
+    applyTheme(next);
+  });
+
+  /* ---------- modal ---------- */
+
+  const modalOverlay = document.getElementById("modal-overlay");
+  const modalRoot = document.getElementById("modal");
+
+  function openModal(html, onMount) {
+    modalRoot.innerHTML = html;
+    modalOverlay.classList.remove("hidden");
+    if (onMount) onMount(modalRoot);
+  }
+
+  function closeModal() {
+    modalOverlay.classList.add("hidden");
+    modalRoot.innerHTML = "";
+  }
+
+  modalOverlay.addEventListener("click", (e) => {
+    if (e.target === modalOverlay) closeModal();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeModal();
+  });
+
+  function setFieldError(fieldEl, message) {
+    fieldEl.classList.toggle("invalid", !!message);
+    const errEl = fieldEl.querySelector(".error");
+    if (errEl) errEl.textContent = message || "";
+  }
+
+  /* ---------- users cache & selects ---------- */
+
+  async function refreshAllUsersCache() {
+    try {
+      const list = await Users.list({ limit: 200, offset: 0 });
+      state.allUsers = list || [];
+      state.allUsers.forEach((u) => state.usersMap.set(u.id, u));
+      populateUserSelects();
+    } catch (e) {
+      toast("Не вдалося завантажити список користувачів: " + e.message, "error");
+    }
+  }
+
+  function populateUserSelects() {
+    const options = state.allUsers
+      .map((u) => `<option value="${u.id}">${escapeHtml(u.full_name)}</option>`)
+      .join("");
+
+    const taskFilter = document.getElementById("filter-task-user");
+    const statsFilter = document.getElementById("stats-user");
+    [taskFilter, statsFilter].forEach((sel) => {
+      const current = sel.value;
+      sel.innerHTML = `<option value="">Усі користувачі</option>${options}`;
+      if ([...sel.options].some((o) => o.value === current)) sel.value = current;
+    });
+  }
+
+  async function authorName(userId) {
+    if (state.usersMap.has(userId)) return state.usersMap.get(userId).full_name;
+    try {
+      const u = await Users.get(userId);
+      state.usersMap.set(userId, u);
+      return u.full_name;
+    } catch (e) {
+      return `Користувач #${userId}`;
+    }
+  }
+
+  /* ---------- tasks ---------- */
+
+  const tasksListEl = document.getElementById("tasks-list");
+  const tasksPaginationEl = document.getElementById("tasks-pagination");
+
+  async function loadTasks() {
+    tasksListEl.innerHTML = `<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>`;
+    tasksPaginationEl.innerHTML = "";
+    try {
+      const params = {
+        limit: state.tasksLimit,
+        offset: state.tasksOffset,
+      };
+      if (state.tasksFilterUser) params.user_id = state.tasksFilterUser;
+
+      const list = await Tasks.list(params);
+      state.tasks = list || [];
+      state.tasksHasMore = state.tasks.length === state.tasksLimit;
+
+      await Promise.all(
+        [...new Set(state.tasks.map((t) => t.author_user_id))]
+          .filter((id) => !state.usersMap.has(id))
+          .map((id) => authorName(id))
+      );
+
+      renderTasks();
+      renderTasksPagination();
+    } catch (e) {
+      tasksListEl.innerHTML = `<div class="empty-state"><span class="emoji">⚠️</span>${escapeHtml(e.message)}</div>`;
+      toast("Не вдалося завантажити завдання: " + e.message, "error");
+    }
+  }
+
+  function filteredTasks() {
+    return state.tasks.filter((t) => {
+      if (state.tasksFilterStatus === "active" && t.completed) return false;
+      if (state.tasksFilterStatus === "done" && !t.completed) return false;
+      if (state.tasksSearch) {
+        const q = state.tasksSearch.toLowerCase();
+        const hay = `${t.title} ${t.description || ""}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }
+
+  function renderTasks() {
+    const items = filteredTasks();
+    if (items.length === 0) {
+      tasksListEl.innerHTML = `<div class="empty-state"><span class="emoji">📭</span>Завдань не знайдено</div>`;
+      return;
+    }
+
+    tasksListEl.innerHTML = items.map((t) => {
+      const author = state.usersMap.get(t.author_user_id);
+      const authorLabel = author ? author.full_name : `Користувач #${t.author_user_id}`;
+      return `
+        <div class="card task-item ${t.completed ? "completed" : ""}" data-id="${t.id}">
+          <label class="checkbox">
+            <input type="checkbox" data-action="toggle-task" data-id="${t.id}" ${t.completed ? "checked" : ""}>
+            <span class="checkmark"></span>
+          </label>
+          <div class="task-main">
+            <div class="task-title">${escapeHtml(t.title)}</div>
+            ${t.description ? `<div class="task-desc">${escapeHtml(t.description)}</div>` : ""}
+            <div class="task-meta">
+              <span class="badge author">👤 ${escapeHtml(authorLabel)}</span>
+              <span class="meta-item">Створено: ${formatDateTime(t.created_at)}</span>
+              ${t.completed_at ? `<span class="meta-item">Виконано: ${formatDateTime(t.completed_at)}</span>` : ""}
+              <span class="meta-item">v${t.version}</span>
+            </div>
+          </div>
+          <div class="task-actions">
+            <button class="icon-btn" data-action="edit-task" data-id="${t.id}" title="Редагувати" type="button">✎</button>
+            <button class="icon-btn danger" data-action="delete-task" data-id="${t.id}" title="Видалити" type="button">🗑</button>
+          </div>
+        </div>`;
+    }).join("");
+  }
+
+  function renderTasksPagination() {
+    const page = Math.floor(state.tasksOffset / state.tasksLimit) + 1;
+    tasksPaginationEl.innerHTML = `
+      <button class="btn btn-ghost" id="tasks-prev" type="button" ${state.tasksOffset === 0 ? "disabled" : ""}>← Назад</button>
+      <span>Сторінка ${page}</span>
+      <button class="btn btn-ghost" id="tasks-next" type="button" ${state.tasksHasMore ? "" : "disabled"}>Далі →</button>
+    `;
+    document.getElementById("tasks-prev").addEventListener("click", () => {
+      state.tasksOffset = Math.max(0, state.tasksOffset - state.tasksLimit);
+      loadTasks();
+    });
+    document.getElementById("tasks-next").addEventListener("click", () => {
+      state.tasksOffset += state.tasksLimit;
+      loadTasks();
+    });
+  }
+
+  function taskFormHtml(task) {
+    const isEdit = !!task;
+    const authorLabel = isEdit
+      ? (state.usersMap.get(task.author_user_id)?.full_name || `Користувач #${task.author_user_id}`)
+      : "";
+    return `
+      <h2>${isEdit ? "Редагувати завдання" : "Нове завдання"}</h2>
+      <form id="task-form" novalidate>
+        <div class="field" data-field="title">
+          <label for="task-title">Назва *</label>
+          <input type="text" id="task-title" maxlength="100" value="${isEdit ? escapeHtml(task.title) : ""}" placeholder="Наприклад: Купити продукти">
+          <div class="error"></div>
+        </div>
+        <div class="field" data-field="description">
+          <label for="task-description">Опис</label>
+          <textarea id="task-description" maxlength="1000" placeholder="Необов'язково">${isEdit ? escapeHtml(task.description || "") : ""}</textarea>
+          <div class="error"></div>
+        </div>
+        ${isEdit ? `
+        <div class="field">
+          <label>Автор</label>
+          <div class="readonly-value">${escapeHtml(authorLabel)}</div>
+        </div>
+        <label class="checkbox-line">
+          <input type="checkbox" id="task-completed" ${task.completed ? "checked" : ""}>
+          Виконано
+        </label>
+        ` : `
+        <div class="field" data-field="author">
+          <label for="task-author">Автор *</label>
+          <select id="task-author">
+            <option value="">Оберіть користувача…</option>
+            ${state.allUsers.map((u) => `<option value="${u.id}">${escapeHtml(u.full_name)}</option>`).join("")}
+          </select>
+          <div class="error"></div>
+        </div>
+        `}
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" id="task-cancel">Скасувати</button>
+          <button type="submit" class="btn btn-primary">${isEdit ? "Зберегти" : "Створити"}</button>
+        </div>
+      </form>
+    `;
+  }
+
+  function openTaskModal(task) {
+    openModal(taskFormHtml(task), (root) => {
+      root.querySelector("#task-cancel").addEventListener("click", closeModal);
+      root.querySelector("#task-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        await submitTaskForm(root, task);
+      });
+    });
+  }
+
+  async function submitTaskForm(root, task) {
+    const titleField = root.querySelector('[data-field="title"]');
+    const descField = root.querySelector('[data-field="description"]');
+    const authorField = root.querySelector('[data-field="author"]');
+
+    [titleField, descField, authorField].forEach((f) => f && setFieldError(f, ""));
+
+    const title = root.querySelector("#task-title").value.trim();
+    const description = root.querySelector("#task-description").value.trim();
+
+    let valid = true;
+    if (title.length < 1 || title.length > 100) {
+      setFieldError(titleField, "Назва має містити від 1 до 100 символів");
+      valid = false;
+    }
+    if (description && description.length > 1000) {
+      setFieldError(descField, "Опис не може перевищувати 1000 символів");
+      valid = false;
+    }
+
+    let authorUserId = task?.author_user_id;
+    if (!task) {
+      const authorSelect = root.querySelector("#task-author");
+      authorUserId = authorSelect.value ? Number(authorSelect.value) : null;
+      if (!authorUserId) {
+        setFieldError(authorField, "Оберіть автора завдання");
+        valid = false;
+      }
+    }
+
+    if (!valid) return;
+
+    const submitBtn = root.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+
+    try {
+      if (task) {
+        const body = {
+          title,
+          description: description || null,
+          completed: root.querySelector("#task-completed").checked,
+        };
+        await Tasks.patch(task.id, body);
+        toast("Завдання оновлено", "success");
+      } else {
+        const body = { title, author_user_id: authorUserId };
+        if (description) body.description = description;
+        await Tasks.create(body);
+        toast("Завдання створено", "success");
+      }
+      closeModal();
+      loadTasks();
+    } catch (e) {
+      toast(e.message, "error");
+    } finally {
+      submitBtn.disabled = false;
+    }
+  }
+
+  async function toggleTask(id, completed) {
+    try {
+      await Tasks.patch(id, { completed });
+      const t = state.tasks.find((x) => x.id === id);
+      if (t) { t.completed = completed; }
+      loadTasks();
+    } catch (e) {
+      toast(e.message, "error");
+      loadTasks();
+    }
+  }
+
+  async function deleteTask(id) {
+    if (!confirm("Видалити це завдання?")) return;
+    try {
+      await Tasks.remove(id);
+      toast("Завдання видалено", "success");
+      loadTasks();
+    } catch (e) {
+      toast(e.message, "error");
+    }
+  }
+
+  tasksListEl.addEventListener("click", async (e) => {
+    const btn = e.target.closest("[data-action]");
+    if (!btn) return;
+    const id = Number(btn.dataset.id);
+    const action = btn.dataset.action;
+
+    if (action === "toggle-task") {
+      toggleTask(id, btn.checked);
+    } else if (action === "edit-task") {
+      const task = state.tasks.find((t) => t.id === id);
+      if (task) openTaskModal(task);
+    } else if (action === "delete-task") {
+      deleteTask(id);
+    }
+  });
+
+  document.getElementById("btn-new-task").addEventListener("click", () => openTaskModal(null));
+  document.getElementById("btn-refresh-tasks").addEventListener("click", () => loadTasks());
+
+  document.getElementById("filter-task-user").addEventListener("change", (e) => {
+    state.tasksFilterUser = e.target.value;
+    state.tasksOffset = 0;
+    loadTasks();
+  });
+  document.getElementById("filter-task-status").addEventListener("change", (e) => {
+    state.tasksFilterStatus = e.target.value;
+    renderTasks();
+  });
+  let searchDebounce;
+  document.getElementById("filter-task-search").addEventListener("input", (e) => {
+    clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(() => {
+      state.tasksSearch = e.target.value.trim();
+      renderTasks();
+    }, 200);
+  });
+  document.getElementById("tasks-page-size").addEventListener("change", (e) => {
+    state.tasksLimit = Number(e.target.value);
+    state.tasksOffset = 0;
+    loadTasks();
+  });
+
+  /* ---------- users ---------- */
+
+  const usersTableBody = document.getElementById("users-table-body");
+  const usersEmptyEl = document.getElementById("users-empty");
+  const usersPaginationEl = document.getElementById("users-pagination");
+
+  async function loadUsers() {
+    usersTableBody.innerHTML = "";
+    usersEmptyEl.innerHTML = `<div class="skeleton"></div>`;
+    usersPaginationEl.innerHTML = "";
+    try {
+      const list = await Users.list({ limit: state.usersLimit, offset: state.usersOffset });
+      state.users = list || [];
+      state.usersHasMore = state.users.length === state.usersLimit;
+      state.users.forEach((u) => state.usersMap.set(u.id, u));
+      usersEmptyEl.innerHTML = "";
+      renderUsers();
+      renderUsersPagination();
+    } catch (e) {
+      usersEmptyEl.innerHTML = `<div class="empty-state"><span class="emoji">⚠️</span>${escapeHtml(e.message)}</div>`;
+      toast("Не вдалося завантажити користувачів: " + e.message, "error");
+    }
+  }
+
+  function renderUsers() {
+    if (state.users.length === 0) {
+      usersEmptyEl.innerHTML = `<div class="empty-state"><span class="emoji">👤</span>Користувачів не знайдено</div>`;
+      usersTableBody.innerHTML = "";
+      return;
+    }
+    usersEmptyEl.innerHTML = "";
+    usersTableBody.innerHTML = state.users.map((u) => `
+      <tr data-id="${u.id}">
+        <td data-label="ID">${u.id}</td>
+        <td data-label="Ім'я">${escapeHtml(u.full_name)}</td>
+        <td data-label="Телефон">${u.phone_number ? escapeHtml(u.phone_number) : "—"}</td>
+        <td data-label="Версія">v${u.version}</td>
+        <td data-label="">
+          <div class="row-actions">
+            <button class="icon-btn" data-action="edit-user" data-id="${u.id}" title="Редагувати" type="button">✎</button>
+            <button class="icon-btn danger" data-action="delete-user" data-id="${u.id}" title="Видалити" type="button">🗑</button>
+          </div>
+        </td>
+      </tr>
+    `).join("");
+  }
+
+  function renderUsersPagination() {
+    const page = Math.floor(state.usersOffset / state.usersLimit) + 1;
+    usersPaginationEl.innerHTML = `
+      <button class="btn btn-ghost" id="users-prev" type="button" ${state.usersOffset === 0 ? "disabled" : ""}>← Назад</button>
+      <span>Сторінка ${page}</span>
+      <button class="btn btn-ghost" id="users-next" type="button" ${state.usersHasMore ? "" : "disabled"}>Далі →</button>
+    `;
+    document.getElementById("users-prev").addEventListener("click", () => {
+      state.usersOffset = Math.max(0, state.usersOffset - state.usersLimit);
+      loadUsers();
+    });
+    document.getElementById("users-next").addEventListener("click", () => {
+      state.usersOffset += state.usersLimit;
+      loadUsers();
+    });
+  }
+
+  function userFormHtml(user) {
+    const isEdit = !!user;
+    return `
+      <h2>${isEdit ? "Редагувати користувача" : "Новий користувач"}</h2>
+      <form id="user-form" novalidate>
+        <div class="field" data-field="full_name">
+          <label for="user-full-name">Повне ім'я *</label>
+          <input type="text" id="user-full-name" maxlength="100" value="${isEdit ? escapeHtml(user.full_name) : ""}" placeholder="Наприклад: Іван Петренко">
+          <div class="error"></div>
+        </div>
+        <div class="field" data-field="phone_number">
+          <label for="user-phone">Телефон</label>
+          <input type="tel" id="user-phone" maxlength="15" value="${isEdit && user.phone_number ? escapeHtml(user.phone_number) : ""}" placeholder="+380501234567">
+          <div class="hint">Формат: починається з "+", лише цифри, 10–15 символів</div>
+          <div class="error"></div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" id="user-cancel">Скасувати</button>
+          <button type="submit" class="btn btn-primary">${isEdit ? "Зберегти" : "Створити"}</button>
+        </div>
+      </form>
+    `;
+  }
+
+  function openUserModal(user) {
+    openModal(userFormHtml(user), (root) => {
+      root.querySelector("#user-cancel").addEventListener("click", closeModal);
+      root.querySelector("#user-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        await submitUserForm(root, user);
+      });
+    });
+  }
+
+  async function submitUserForm(root, user) {
+    const nameField = root.querySelector('[data-field="full_name"]');
+    const phoneField = root.querySelector('[data-field="phone_number"]');
+    [nameField, phoneField].forEach((f) => setFieldError(f, ""));
+
+    const fullName = root.querySelector("#user-full-name").value.trim();
+    const phone = root.querySelector("#user-phone").value.trim();
+
+    let valid = true;
+    if (fullName.length < 3 || fullName.length > 100) {
+      setFieldError(nameField, "Ім'я має містити від 3 до 100 символів");
+      valid = false;
+    }
+    if (phone) {
+      const phoneOk = /^\+[0-9]+$/.test(phone) && phone.length >= 10 && phone.length <= 15;
+      if (!phoneOk) {
+        setFieldError(phoneField, "Телефон має починатись з \"+\" і містити 10–15 цифр");
+        valid = false;
+      }
+    }
+    if (!valid) return;
+
+    const submitBtn = root.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+
+    try {
+      if (user) {
+        await Users.patch(user.id, { full_name: fullName, phone_number: phone || null });
+        toast("Користувача оновлено", "success");
+      } else {
+        const body = { full_name: fullName };
+        if (phone) body.phone_number = phone;
+        await Users.create(body);
+        toast("Користувача створено", "success");
+      }
+      closeModal();
+      loadUsers();
+      refreshAllUsersCache();
+    } catch (e) {
+      toast(e.message, "error");
+    } finally {
+      submitBtn.disabled = false;
+    }
+  }
+
+  async function deleteUser(id) {
+    if (!confirm("Видалити цього користувача? Пов'язані завдання можуть стати недоступними.")) return;
+    try {
+      await Users.remove(id);
+      toast("Користувача видалено", "success");
+      loadUsers();
+      refreshAllUsersCache();
+    } catch (e) {
+      toast(e.message, "error");
+    }
+  }
+
+  usersTableBody.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-action]");
+    if (!btn) return;
+    const id = Number(btn.dataset.id);
+    const action = btn.dataset.action;
+
+    if (action === "edit-user") {
+      const user = state.users.find((u) => u.id === id);
+      if (user) openUserModal(user);
+    } else if (action === "delete-user") {
+      deleteUser(id);
+    }
+  });
+
+  document.getElementById("btn-new-user").addEventListener("click", () => openUserModal(null));
+
+  document.getElementById("users-page-size").addEventListener("change", (e) => {
+    state.usersLimit = Number(e.target.value);
+    state.usersOffset = 0;
+    loadUsers();
+  });
+
+  /* ---------- statistics ---------- */
+
+  const statsCardsEl = document.getElementById("stats-cards");
+
+  async function loadStatistics() {
+    statsCardsEl.innerHTML = `<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>`;
+    try {
+      const userId = document.getElementById("stats-user").value;
+      const from = document.getElementById("stats-from").value;
+      const to = document.getElementById("stats-to").value;
+
+      const stats = await Statistics.get({ user_id: userId, from, to });
+      renderStatistics(stats);
+    } catch (e) {
+      statsCardsEl.innerHTML = `<div class="empty-state"><span class="emoji">⚠️</span>${escapeHtml(e.message)}</div>`;
+      toast("Не вдалося завантажити статистику: " + e.message, "error");
+    }
+  }
+
+  function renderStatistics(stats) {
+    const rate = stats.tasks_completed_rate != null ? `${stats.tasks_completed_rate.toFixed(1)}%` : "—";
+    statsCardsEl.innerHTML = `
+      <div class="stat-card accent">
+        <div class="label">Створено завдань</div>
+        <div class="value">${stats.tasks_created}</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Виконано завдань</div>
+        <div class="value">${stats.tasks_completed}</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Відсоток виконання</div>
+        <div class="value">${rate}</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Середній час виконання</div>
+        <div class="value">${formatGoDuration(stats.tasks_average_completion_time)}</div>
+      </div>
+    `;
+  }
+
+  document.getElementById("stats-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    loadStatistics();
+  });
+  document.getElementById("btn-stats-reset").addEventListener("click", () => {
+    document.getElementById("stats-user").value = "";
+    document.getElementById("stats-from").value = "";
+    document.getElementById("stats-to").value = "";
+    loadStatistics();
+  });
+
+  /* ---------- init ---------- */
+
+  (async function init() {
+    await refreshAllUsersCache();
+    loadTasks();
+    loadUsers();
+    loadStatistics();
+  })();
+})();
+</script>
+</body>
+</html>

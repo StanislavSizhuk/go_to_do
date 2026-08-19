@@ -9,8 +9,8 @@ import (
 	"github.com/StanislavSizhuk/go_to_do/docs"
 	core_logger "github.com/StanislavSizhuk/go_to_do/internal/core/logger"
 	core_http_middleware "github.com/StanislavSizhuk/go_to_do/internal/core/transport/http/middleware"
+	httpSwagger "github.com/swaggo/http-swagger"
 	"go.uber.org/zap"
-	"github.com/swaggo/http-swagger"
 )
 
 type HTTPServer struct {
@@ -42,6 +42,14 @@ func (s *HTTPServer) RegisterAPIRoutes(routers ...*APIVersionRouter) {
 			prefix+"/",
 			http.StripPrefix(prefix, router.WithMiddleware()),
 		)
+	}
+}
+
+func (s *HTTPServer) RegisterRoutes(routes ...Route) {
+	for _, route := range routes {
+		pattern := fmt.Sprintf("%s %s", route.Method, route.Path)
+
+		s.mux.Handle(pattern, route.WithMiddleware())
 	}
 }
 
