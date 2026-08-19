@@ -57,6 +57,19 @@ func NewTaskUninitialized(
 		authorUserID,
 	)
 }
+func (t *Task) CompletionDuration() *time.Duration {
+	if !t.Completed {
+		return nil
+	}
+
+	if t.CompletedAt == nil {
+		return nil
+	}
+
+	duration := t.CompletedAt.Sub(t.CreatedAt)
+
+	return &duration
+}
 
 func (t *Task) Validate() error {
 	titleLen := len([]rune(t.Title))
@@ -166,7 +179,7 @@ func (t *Task) ApplyPatch(patch TaskPatch) error {
 			tmp.CompletedAt = nil
 		}
 	}
-   	if err := tmp.Validate(); err != nil {
+	if err := tmp.Validate(); err != nil {
 		return fmt.Errorf("validate patched task: %w", err)
 	}
 
